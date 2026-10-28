@@ -1,0 +1,151 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Already Here</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@800&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+  :root { --sky: #12284A; --deep: #0B1A2E; --ice: #BFE2F2; --text: #F6F8FA; --muted: #A6B2C6; --accent: #D9480F; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; background: #060E1A; color: var(--text); font-family: 'IBM Plex Sans', system-ui, sans-serif; overflow: hidden; }
+  body.idle { cursor: none; }
+  /* the 16:9 stage, as large as the window allows */
+  #stage { position: absolute; left: 50%; top: 50%; width: min(100vw, 177.78vh); height: min(56.25vw, 100vh); transform: translate(-50%, -50%); background: var(--deep); overflow: hidden; }
+  #stage video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity .25s ease; }
+  #stage video.on { opacity: 1; }
+  /* start screen */
+  #start { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: flex-end; padding: 6% 7%; gap: 18px;
+    background: linear-gradient(180deg, rgba(11,26,46,0) 30%, rgba(11,26,46,.85) 100%); z-index: 3; cursor: pointer; }
+  #start h1 { font-family: 'Archivo', system-ui, sans-serif; font-weight: 800; font-size: clamp(40px, 8vw, 120px); line-height: .95; letter-spacing: -0.02em; }
+  #start p { font-size: clamp(15px, 1.5vw, 22px); color: var(--muted); max-width: 46em; line-height: 1.5; }
+  #start .go { align-self: flex-start; margin-top: 8px; font: 600 clamp(16px, 1.6vw, 22px)/1 'IBM Plex Sans', system-ui, sans-serif; color: var(--deep); background: var(--ice);
+    border: 0; border-radius: 999px; padding: 16px 30px; cursor: pointer; }
+  #start .go:focus-visible, .ctl button:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+  kbd { font: 500 .9em 'IBM Plex Sans', system-ui, sans-serif; border: 1px solid #4A5B78; border-bottom-width: 2px; border-radius: 6px; padding: 1px 7px; color: var(--text); }
+  /* controls */
+  .ctl { position: fixed; left: 0; right: 0; bottom: 0; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 20px;
+    background: linear-gradient(0deg, rgba(6,14,26,.85), rgba(6,14,26,0)); transition: opacity .3s ease; z-index: 4; }
+  body.idle .ctl { opacity: 0; pointer-events: none; }
+  .ctl .group { display: flex; align-items: center; gap: 10px; }
+  .ctl button { font: 500 15px/1 'IBM Plex Sans', system-ui, sans-serif; color: var(--text); background: rgba(31,62,107,.75); border: 1px solid #2E4C7A;
+    border-radius: 999px; height: 44px; min-width: 44px; padding: 0 16px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; }
+  .ctl button:hover { background: rgba(46,76,122,.9); }
+  .ctl button:disabled { opacity: .35; cursor: default; }
+  .ctl #next { background: var(--ice); color: var(--deep); border-color: var(--ice); font-weight: 600; height: 52px; padding: 0 26px; font-size: 17px; }
+  .dots { display: flex; gap: 8px; align-items: center; }
+  .dots i { width: 9px; height: 9px; border-radius: 50%; background: #3A5480; display: block; transition: background .2s, transform .2s; }
+  .dots i.on { background: var(--ice); transform: scale(1.25); }
+  .count { font-size: 14px; color: var(--muted); min-width: 3.2em; }
+  /* rehearsal notes (N) */
+  #notes { position: fixed; left: 20px; right: 20px; bottom: 84px; max-width: 980px; margin: 0 auto; background: rgba(6,14,26,.92); border: 1px solid #2E4C7A;
+    border-radius: 14px; padding: 18px 22px; font-size: 18px; line-height: 1.5; color: var(--text); display: none; z-index: 4; }
+  #notes.show { display: block; }
+  #notes b { color: var(--ice); font-weight: 600; }
+  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+  @media (max-width: 640px) { .ctl .hide-s { display: none; } .ctl #next { padding: 0 18px; } }
+</style>
+</head>
+<body>
+<div id="stage" aria-label="Presentation stage">
+  <video src="media/scene1.mp4" poster="media/scene1-first.jpg" preload="auto" playsinline class="on" aria-label="Scene 1: the Titanic hits an iceberg; Already hit."></video>
+  <video src="media/scene2.mp4" poster="media/scene2-first.jpg" preload="auto" playsinline aria-label="Scene 2: 99% use AI, 36% say they do, 64% don’t notice"></video>
+  <video src="media/scene3.mp4" poster="media/scene3-first.jpg" preload="auto" playsinline aria-label="Scene 3: below the waterline — the future above, what is already here below"></video>
+  <video src="media/scene4.mp4" poster="media/scene4-first.jpg" preload="auto" playsinline aria-label="Scene 4: tonight, 3 steps — notice, choose, question"></video>
+  <video src="media/scene5.mp4" poster="media/scene5-first.jpg" preload="auto" playsinline aria-label="Scene 5: Already here. Tonight: notice 3 apps"></video>
+  <div id="start" role="button" tabindex="0" aria-label="Start the presentation">
+    <h1>Already Here</h1>
+    <p>Technology and our future · a 2-minute talk in five scenes. Each scene plays on its own, then waits.
+      Move on with <kbd>→</kbd>, <kbd>Space</kbd>, a presentation clicker, a click anywhere, or the <b>Next</b> button.
+      <kbd>F</kbd> full screen · <kbd>M</kbd> sound · <kbd>N</kbd> speaker notes.</p>
+    <button class="go" id="go">▶ Start presentation</button>
+  </div>
+</div>
+<div class="ctl" id="ctl">
+  <div class="group">
+    <button id="prev" aria-label="Previous scene">◀<span class="hide-s">Back</span></button>
+    <div class="dots" id="dots" aria-hidden="true"><i class="on"></i><i></i><i></i><i></i><i></i></div>
+    <span class="count" id="count" aria-live="polite">1 / 5</span>
+  </div>
+  <div class="group">
+    <button id="snd" aria-label="Mute sound" class="hide-s">Sound on</button>
+    <button id="notesb" aria-label="Show speaker notes" class="hide-s">Notes</button>
+    <button id="fs" aria-label="Full screen">⛶<span class="hide-s">Full screen</span></button>
+    <button id="next" aria-label="Next scene">Next ▶</button>
+  </div>
+</div>
+<div id="notes" aria-live="polite"></div>
+<script>
+  const NOTES = [
+    "<b>Scene 1 · 0:00–0:27</b> — 3-second breath. Good morning, professor and classmates. Raise your hand if you used AI today. [wait 2 s] In 1912, the Titanic hit an iceberg. As Pavel Durov, Telegram’s CEO, points out, it did not sink all at once. People stayed calm. They didn’t know it was already hit. Technology is our iceberg. <b>▶ Next on “iceberg”.</b>",
+    "<b>Scene 2 · 0:27–0:54</b> — Here’s the problem. Gallup found that 99 percent [pause] of American adults used AI products in one week. But only 36 percent [pause] said they did. Most of us don’t notice. I’m one of them. This morning, Maps chose my route, Spotify my music, Instagram my news. I never thought: I’m using AI. <b>▶ Next on “using AI”.</b>",
+    "<b>Scene 3 · 0:54–1:22</b> — We watch the tip: Tesla’s flying Roadster, Meta’s glasses that want to replace our phones. But look below, and it says now. Meta’s Muse models power AI agents. Our homes obey our voice. Llave MX moves government online. And Anduril builds AI weapons while people protest. [pause] Who controls that? It’s already here. <b>▶ Next on “already here”.</b>",
+    "<b>Scene 4 · 1:22–1:39</b> — So, three steps for tonight. One: notice three apps that decided something for you. Two: choose. Turn one AI setting on or off on purpose. Three: question. Ask who controls it. <b>▶ Next on “controls it”.</b>",
+    "<b>Scene 5 · 1:39–1:56</b> — The Titanic didn’t sink from the ice people saw. I built this talk in Claude Slides, with every scene in code, so the story moves with my words. Tonight, notice your three apps. Thank you. <b>[End — stay two seconds, smile.]</b>"
+  ];
+  const vids = [...document.querySelectorAll('#stage video')];
+  const $ = id => document.getElementById(id);
+  let cur = 0, started = false, muted = false, busy = false;
+
+  function ui() {
+    $('count').textContent = `${cur + 1} / ${vids.length}`;
+    [...$('dots').children].forEach((d, i) => d.classList.toggle('on', i === cur));
+    $('prev').disabled = cur === 0 || !started; $('next').disabled = cur === vids.length - 1 && started;
+    $('notes').innerHTML = NOTES[cur];
+  }
+  // Show the next clip only once its first frame is really on screen, then hide the old one:
+  // each clip starts on the exact frame where the last one stopped, so the change is invisible.
+  function show(i) {
+    if (i < 0 || i >= vids.length || busy) return;
+    busy = true;
+    const old = vids[cur], nv = vids[i];
+    nv.muted = muted; nv.currentTime = 0;
+    const swap = () => {
+      nv.classList.add('on'); if (old !== nv) { old.classList.remove('on'); setTimeout(() => { old.pause(); }, 300); }
+      cur = i; busy = false; ui();
+    };
+    const p = nv.play();
+    if ('requestVideoFrameCallback' in nv) nv.requestVideoFrameCallback(() => swap());
+    else nv.addEventListener('playing', swap, { once: true });
+    if (p && p.catch) p.catch(() => { busy = false; });
+    setTimeout(() => { if (busy) swap(); }, 1200);          // safety net on slow machines
+  }
+  function start() {
+    if (started) return; started = true;
+    $('start').style.display = 'none';
+    vids.forEach(v => v.load && v.preload !== 'auto' && v.load());
+    show(0);
+  }
+  const next = () => started ? show(cur + 1) : start();
+  const prev = () => started && show(cur - 1);
+
+  $('go').addEventListener('click', e => { e.stopPropagation(); start(); });
+  $('start').addEventListener('click', start);
+  $('stage').addEventListener('click', e => { if (started) next(); });
+  $('next').addEventListener('click', next);
+  $('prev').addEventListener('click', prev);
+  $('fs').addEventListener('click', toggleFs);
+  $('snd').addEventListener('click', toggleSnd);
+  $('notesb').addEventListener('click', () => $('notes').classList.toggle('show'));
+  function toggleFs() { document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen().catch(() => {}); }
+  function toggleSnd() { muted = !muted; vids.forEach(v => v.muted = muted); $('snd').textContent = muted ? 'Sound off' : 'Sound on'; $('snd').setAttribute('aria-label', muted ? 'Unmute sound' : 'Mute sound'); }
+
+  document.addEventListener('keydown', e => {
+    if (e.altKey || e.ctrlKey || e.metaKey) return;
+    const k = e.key;
+    if (['ArrowRight', 'ArrowDown', 'PageDown', ' ', 'Enter', 'n', 'N'].includes(k) && !(k === 'Enter' && document.activeElement.tagName === 'BUTTON')) {
+      if (k === 'n' || k === 'N') { $('notes').classList.toggle('show'); return; }
+      e.preventDefault(); next();
+    } else if (['ArrowLeft', 'ArrowUp', 'PageUp', 'Backspace'].includes(k)) { e.preventDefault(); prev(); }
+    else if (k === 'f' || k === 'F') toggleFs();
+    else if (k === 'm' || k === 'M') toggleSnd();
+    else if (k === 'Home') show(0);
+  });
+
+  // hide the controls and cursor while presenting; any mouse move brings them back
+  let idleT; const wake = () => { document.body.classList.remove('idle'); clearTimeout(idleT); idleT = setTimeout(() => started && document.body.classList.add('idle'), 2500); };
+  ['mousemove', 'touchstart'].forEach(ev => document.addEventListener(ev, wake, { passive: true })); wake();
+  ui();
+</script>
+</body>
+</html>
