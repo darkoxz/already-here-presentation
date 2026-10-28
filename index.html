@@ -85,7 +85,7 @@
   ];
   const vids = [...document.querySelectorAll('#stage video')];
   const $ = id => document.getElementById(id);
-  let cur = 0, started = false, muted = false, busy = false;
+  let cur = 0, started = false, muted = false, busy = false, target = 0, queued = null, gen = 0;
 
   function ui() {
     $('count').textContent = `${cur + 1} / ${vids.length}`;
@@ -96,18 +96,21 @@
   // Show the next clip only once its first frame is really on screen, then hide the old one:
   // each clip starts on the exact frame where the last one stopped, so the change is invisible.
   function show(i) {
-    if (i < 0 || i >= vids.length || busy) return;
-    busy = true;
+    if (i < 0 || i >= vids.length) return;
+    if (busy) { queued = i; return; }            // a press during a change is kept, never dropped
+    busy = true; target = i; const my = ++gen;
     const old = vids[cur], nv = vids[i];
     nv.muted = muted; nv.currentTime = 0;
     const swap = () => {
-      nv.classList.add('on'); if (old !== nv) { old.classList.remove('on'); setTimeout(() => { old.pause(); }, 300); }
+      if (my !== gen || !busy) return;              // only the newest change may finish
+      nv.classList.add('on'); if (old !== nv) { old.classList.remove('on'); setTimeout(() => { if (vids[cur] !== old) old.pause(); }, 300); }
       cur = i; busy = false; ui();
+      if (queued !== null) { const q = queued; queued = null; show(q); }
     };
     const p = nv.play();
     if ('requestVideoFrameCallback' in nv) nv.requestVideoFrameCallback(() => swap());
     else nv.addEventListener('playing', swap, { once: true });
-    if (p && p.catch) p.catch(() => { busy = false; });
+    if (p && p.catch) p.catch(() => { if (my === gen) busy = false; });
     setTimeout(() => { if (busy) swap(); }, 1200);          // safety net on slow machines
   }
   function start() {
@@ -116,8 +119,15 @@
     vids.forEach(v => v.load && v.preload !== 'auto' && v.load());
     show(0);
   }
-  const next = () => started ? show(cur + 1) : start();
-  const prev = () => started && show(cur - 1);
+  const at = () => queued !== null ? queued : (busy ? target : cur);
+  const next = () => started ? show(at() + 1) : start();
+  const prev = () => started && show(at() - 1);
+
+  // show how many scenes are ready on the Start button
+  let ready = 0; const go = $('go');
+  vids.forEach(v => { const done = () => { ready++; go.textContent = ready < vids.length ? `▶ Start presentation · loading ${ready}/${vids.length}` : '▶ Start presentation · ready'; };
+    if (v.readyState >= 4) done(); else v.addEventListener('canplaythrough', done, { once: true }); });
+  if (ready < vids.length) go.textContent = `▶ Start presentation · loading ${ready}/${vids.length}`;
 
   $('go').addEventListener('click', e => { e.stopPropagation(); start(); });
   $('start').addEventListener('click', start);
